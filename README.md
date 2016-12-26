@@ -1,6 +1,6 @@
-# tikznn
+# `drawnn`
 
-A Latex package to create neural network figures in Latex.
+A sty Latex package to create neural network figures in Latex.
 
 It requires [`tikz`](https://www.ctan.org/pkg/pgf?lang=en) package to function.
 

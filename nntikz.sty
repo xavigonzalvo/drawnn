@@ -1,0 +1,132 @@
+\NeedsTeXFormat{LaTeX2e}[1994-06-01]
+\ProvidesPackage{nntikz}[2016/12/06 Neural network figures with tikz]
+
+\RequirePackage{tikz}
+\RequirePackage{pdftexcmds}
+
+% Declare options.
+\DeclareOption{grid}{\def \gridOn{}}
+\ProcessOptions\relax
+
+% Defines a neural network.
+%   input_dim: integer defining the input dimension.
+%   output_dim: integer defining the output dimension.
+%   hidden_layers: comma-separated list of hidden layer dimensions.
+%   options: {center}
+\newcommand{\drawnn}[4]{
+  % Process options.
+  \pgfmathsetmacro\centerNodes{int(0)}
+  \@for\next:=#4\do{
+    \ifnum\pdf@strcmp{\next}{center}=0 \relax
+    \pgfmathsetmacro\centerNodes{int(1)}
+    \fi
+  }
+  \begin{tikzpicture}[
+      input_node/.style={
+        draw=black,
+        fill=blue,
+        minimum width=3mm,
+        circle},
+      output_node/.style={
+        draw=black,
+        fill=red,
+        minimum width=3mm,
+        circle},
+      hidden_node/.style={
+        draw=black,
+        fill=gray,
+        minimum width=3mm,
+        circle}
+    ]
+    % Find input position.
+    \newcount \maxhiddensize
+    \newcount \numlayers
+    \newcount \firstlayersize
+    \@for\next:=#3\do{  % for each layer size
+      \ifx \ccdef \undefined
+      \def \ccdef {}
+      \firstlayersize \next\relax
+      \fi
+      \ifnum \next>\the\maxhiddensize
+      \maxhiddensize \next\relax
+      \fi
+      \advance\numlayers 1\relax
+    }
+    \ifnum \centerNodes=0
+      \pgfmathsetmacro\inputpos{0}
+      \pgfmathsetmacro\outputpos{0.5}
+    \else
+      \pgfmathsetmacro\inputpos{\the\maxhiddensize / 2 - #1 / 2 + 1}
+      \pgfmathsetmacro\outputpos{\the\maxhiddensize / 2 - #2 / 2}
+    \fi
+    % Grid.
+    \ifx \gridOn \undefined \else
+    \foreach \x in {0,...,6} {
+      \foreach \y in {1,...,6} {
+        \node at (\x, \y) {\small (\x, \y)};
+        \node at (\x, -\y) {\small (\x, -\y)};
+      }
+    }
+    \fi
+    % Create input nodes.
+    \foreach \x in {1,...,#1} {
+      \node[input_node,label=180:$x_\x$] (x_\x) at (1, -\x - \inputpos) {};
+    }
+    % Create hidden layers.
+    \newcount \layer
+    \layer 1\relax
+    \@for\next:=#3\do{  % for each layer size
+      % Create node.
+      \foreach \y in {1,...,\next} {
+        \ifnum \centerNodes=0
+          \node[hidden_node] (h\the\layer_\y) at (\the\layer + 1, -\y) {};
+        \else
+          \pgfmathparse{\the\maxhiddensize / 2 - \next / 2 + 2}
+          \node[hidden_node] (h\the\layer_\y) at (\the\layer + 1,
+                                                  -\pgfmathresult - \y + 1) {};
+        \fi
+      }      
+      \advance\layer 1\relax
+    }
+    % Create output layer.
+    \foreach \y in {1,...,#2} {
+      \ifnum \centerNodes=0
+      \node[output_node,label=0:$o_\y$] (o_\y) at (
+          \the\numlayers + 2, -\y - \outputpos) {};
+      \else
+      \pgfmathparse{\the\maxhiddensize / 2 - #2 / 2 + 2}
+      \node[output_node,label=0:$o_\y$] (o_\y) at (
+          \the\numlayers + 2, -\y - \pgfmathresult + 1) {};
+      \fi
+    }
+    % Input connections.
+    \foreach \x in {1,...,#1} {
+      \foreach \y in {1,...,\the\firstlayersize} {
+        \draw (x_\x) -- (h1_\y);
+      }
+    }
+    % Subnetwork connection.
+    \layer 1\relax
+    \newcount \prevlayersize
+    \@for\next:=#3\do{  % for each layer size
+      \ifnum \the\layer>1
+      \foreach \x in {1,...,\the\prevlayersize} {
+        \foreach \y in {1,...,\next} {
+          \pgfmathparse{int(\the\layer - 1)}
+          % Hidden connections.
+          \draw (h\pgfmathresult_\x) -- (h\the\layer_\y);
+        }
+      }
+      \fi
+      \advance\layer 1\relax
+      \prevlayersize \next\relax
+    }
+    % Regular output connections.
+    \advance\layer -1\relax
+    \foreach \x in {1,...,#2} {
+      \foreach \y in {1,...,\the\prevlayersize} {
+        \draw[ultra thin] (h\the\layer_\y) -- (o_\x);
+      }
+    }
+  \end{tikzpicture}
+}

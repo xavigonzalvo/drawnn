@@ -1,4 +1,4 @@
-# Drawnn
+# tikznn
 
 A Latex package to create neural network figures in Latex.
 
@@ -6,7 +6,7 @@ It requires [`tikz`](https://www.ctan.org/pkg/pgf?lang=en) package to function.
 
 ## Usage
 
-It's really straightforward to use in a latex document:
+It's really simple to draw neural networks:
 
 ```latex
 \drawnn{<input dimension>}{<output dimension>}{<hidden layer dimensions>}{<options>}
@@ -26,6 +26,8 @@ For example, to create a neural network with 3 input nodes, 1 output and two hid
 
 
 ## Full latex example
+
+It's really straightforward to use in a latex document. Just copy the `sty` file into the same folder where your `tex` file is and include the package `nntikz`.
 
 ```latex
 \documentclass{article}

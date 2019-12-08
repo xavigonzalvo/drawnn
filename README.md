@@ -46,3 +46,6 @@ It's really straightforward to use in a latex document. Just copy the `sty` file
 There is only one option at the moment:
 
 - `center`: use to center all nodes with respect to vertical axis.
+
+![Example1](example.jpg)
+![Example2](example2.jpg)
